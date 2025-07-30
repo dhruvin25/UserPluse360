@@ -1,0 +1,93 @@
+{
+  "features": [
+    {
+      "category": "Account Management & Everyday Banking",
+      "description": "Features related to checking balances, transactions, and routine money movements.",
+      "sub_features": [
+        "view_account_summary",
+        "view_transaction_history",
+        "transfer_funds_internal",
+        "transfer_funds_etransfer_send",
+        "transfer_funds_etransfer_receive",
+        "bill_payment_one_time",
+        "bill_payment_recurring_setup",
+        "mobile_cheque_deposit",
+        "order_cheques",
+        "download_e_statement",
+        "set_up_account_alerts",
+        "view_account_details",
+        "manage_overdraft_protection"
+      ]
+    },
+    {
+      "category": "SIN Card Points / Rewards",
+      "description": "Features for managing and redeeming loyalty points or rewards programs.",
+      "sub_features": [
+        "view_rewards_balance",
+        "redeem_rewards",
+        "explore_rewards_offers",
+        "link_rewards_card"
+      ]
+    },
+    {
+      "category": "Credit & Loans",
+      "description": "Features related to credit cards, personal loans, mortgages, and credit checks.",
+      "sub_features": [
+        "check_credit_score",
+        "apply_for_credit_card",
+        "apply_for_loan_personal",
+        "apply_for_loan_mortgage",
+        "apply_for_loan_line_of_credit",
+        "view_loan_details",
+        "make_loan_payment",
+        "manage_credit_card_settings",
+        "view_credit_card_statement"
+      ]
+    },
+    {
+      "category": "Investments",
+      "description": "Features for managing investment portfolios, trading, and opening investment accounts.",
+      "sub_features": [
+        "view_investment_portfolio",
+        "buy_sell_stocks_mutual_funds",
+        "transfer_funds_to_investment_account",
+        "open_new_investment_account",
+        "research_investment_options",
+        "view_investment_performance"
+      ]
+    },
+    {
+      "category": "Profile & Security Updates",
+      "description": "Features for managing user profile information, security settings, and login credentials.",
+      "sub_features": [
+        "update_contact_information",
+        "change_password",
+        "update_username",
+        "setup_biometric_login",
+        "manage_security_alerts",
+        "update_marketing_preferences",
+        "view_security_history"
+      ]
+    },
+    {
+      "category": "Customer Service / Support",
+      "description": "Features for accessing help, contacting support, or booking appointments.",
+      "sub_features": [
+        "chat_with_support",
+        "book_advisor_appointment",
+        "view_faq_help",
+        "send_secure_message"
+      ]
+    },
+    {
+      "category": "Financial Tools & Insights",
+      "description": "Features offering budgeting, spending tracking, and personalized financial advice.",
+      "sub_features": [
+        "access_budgeting_tool",
+        "track_spending_categories",
+        "view_financial_insights",
+        "set_financial_goals"
+      ]
+    }
+  ]
+}
