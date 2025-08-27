@@ -1,0 +1,57 @@
+-- Use the new warehouse, database, and schema
+USE WAREHOUSE UserPulse360;
+USE DATABASE UserPulse360_DB;
+USE SCHEMA RAW_DATA;
+
+SELECT
+    user_id,
+    Segment,
+    average_session_length_minutes,
+    churn_probability,
+    predicted_churn,
+    days_since_last_login,
+    login_frequency,
+    platform_desktop_app_count,
+    platform_mobile_android_count,
+    platform_mobile_ios_count,
+    platform_web_count,
+    total_events,
+    total_session_length_minutes,
+    unique_categories_used,
+    unique_features_used,
+    last_login_date
+FROM DIM_USERS;
+
+-- Feature Usage Trends
+SELECT
+    fu.date,
+    fu.feature_name,
+    fu.daily_usage_count,
+    fs.usage_count AS total_usage_count
+FROM FACT_FEATURE_USAGE fu
+LEFT JOIN FACT_FEATURE_SUMMARY fs
+    ON fu.feature_name = fs.feature_used;
+
+-- Event History
+SELECT
+    user_id,
+    date,
+    category_used,
+    feature_used,
+    platform,
+    session_length_sec
+FROM FACT_EVENTS;
+
+-- Daily Active Users
+SELECT
+    activity_date,
+    daily_active_users
+FROM FACT_DAILY_ACTIVE_USERS;
+
+-- Weekly Active Users
+SELECT
+    year,
+    week,
+    weekly_active_users,
+    week_start_date
+FROM FACT_WEEKLY_ACTIVE_USERS;
