@@ -1,0 +1,121 @@
+-- Create a new warehouse
+CREATE OR REPLACE WAREHOUSE UserPulse360 WITH
+  WAREHOUSE_SIZE = 'XSMALL'
+  WAREHOUSE_TYPE = 'STANDARD'
+  AUTO_SUSPEND = 600 -- Suspends after 10 minutes of inactivity
+  AUTO_RESUME = TRUE
+  INITIALLY_SUSPENDED = TRUE;
+
+-- Create a new database
+CREATE OR REPLACE DATABASE UserPulse360_DB;
+
+-- Create a new schema within the database
+CREATE OR REPLACE SCHEMA RAW_DATA;
+
+-- Use the new warehouse, database, and schema
+USE WAREHOUSE UserPulse360;
+USE DATABASE UserPulse360_DB;
+USE SCHEMA RAW_DATA;
+
+CREATE OR REPLACE STORAGE INTEGRATION AWS_S3_INT
+TYPE = EXTERNAL_STAGE
+STORAGE_PROVIDER = S3
+ENABLED = TRUE 
+STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::888888888888:role/SNOWFLAKE-S3-FULL-ACCESS'
+STORAGE_ALLOWED_LOCATIONS = ('s3://userpulse360/loadingdata/csv/')
+STORAGE_BLOCKED_LOCATIONS = ('s3://userpulse360/secret_folder/')
+COMMENT = 'Create Storage integration to connect Snowflake with AWS' 
+
+
+DESCRIBE INTEGRATION AWS_S3_INT
+
+
+-- DROP SCHEMA RAW_DATA CASCADE;
+
+-- DROP DATABASE UserPulse360_DB;
+-- DROP WAREHOUSE UserPulse360;
+
+SHOW GRANTS ON SCHEMA RAW_DATA;
+
+-- DDL for the DIM_USERS table
+CREATE TABLE IF NOT EXISTS DIM_USERS (
+    user_id VARCHAR(36) PRIMARY KEY,
+    Segment VARCHAR(50),
+    average_session_length_minutes DECIMAL(10,2),
+    churn_probability DECIMAL(5,4),
+    days_since_last_login INT,
+    last_login_date DATE,
+    login_frequency DECIMAL(10,2),
+    platform_desktop_app_count INT,
+    platform_mobile_android_count INT,
+    platform_mobile_ios_count INT,
+    platform_web_count INT,
+    predicted_churn BOOLEAN,
+    total_events INT,
+    total_session_length_minutes DECIMAL(10,2),
+    unique_categories_used INT,
+    unique_features_used INT
+);
+
+
+-- DDL for the FACT_EVENTS table
+CREATE TABLE IF NOT EXISTS FACT_EVENTS (
+    event_id INT AUTOINCREMENT START 1 INCREMENT 1,
+    user_id VARCHAR(36) NOT NULL,
+    timestamp TIMESTAMP_NTZ NOT NULL,
+    category_used VARCHAR(50),
+    feature_used VARCHAR(100),
+    session_length_sec INT,
+    platform VARCHAR(20),
+    date DATE,
+    week INT,
+    year INT
+)
+CLUSTER BY (TO_DATE(timestamp), user_id);
+select * from FACT_EVENTS;
+
+
+
+
+-- DDL for the daily active users table
+CREATE TABLE IF NOT EXISTS FACT_DAILY_ACTIVE_USERS (
+    activity_date DATE PRIMARY KEY,
+    daily_active_users INT
+);
+select * from FACT_DAILY_ACTIVE_USERS;
+
+
+-- DDL for the weekly active users table
+CREATE TABLE IF NOT EXISTS FACT_WEEKLY_ACTIVE_USERS (
+    year INT,
+    week INT,
+    weekly_active_users INT,
+    week_start_date DATE
+);
+ALTER TABLE FACT_WEEKLY_ACTIVE_USERS
+ADD COLUMN week_start_date DATE;
+
+-- 2. Update the column with Monday of each week
+UPDATE FACT_WEEKLY_ACTIVE_USERS
+SET week_start_date = DATEADD(
+    day,
+    ((week - 1) * 7) - MOD(DATE_PART('dow', DATE_FROM_PARTS(year, 1, 1)) + 6, 7),
+    DATE_FROM_PARTS(year, 1, 1)
+);
+
+select * from FACT_WEEKLY_ACTIVE_USERS;
+-- DDL for the feature usage table
+CREATE TABLE IF NOT EXISTS FACT_FEATURE_USAGE (
+    date DATE,
+    feature_name VARCHAR(100),
+    daily_usage_count INT
+);
+
+select * from FACT_FEATURE_USAGE;
+
+-- DDL for the feature summary table
+CREATE TABLE IF NOT EXISTS FACT_FEATURE_SUMMARY (
+    feature_used VARCHAR(100) PRIMARY KEY,
+    usage_count INT
+);
+Select * from FACT_FEATURE_SUMMARY;
