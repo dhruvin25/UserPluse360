@@ -1,0 +1,62 @@
+-- Use the new warehouse, database, and schema
+USE WAREHOUSE UserPulse360;
+USE DATABASE UserPulse360_DB;
+USE SCHEMA RAW_DATA;
+
+-- SELECT * FROM <database_name>.<schema_name>.<table_name>;
+
+
+-- GRANT USAGE ON SCHEMA UserPulse360_DB.RAW_DATA TO ROLE ACCOUNTADMIN;
+-- REVOKE USAGE ON SCHEMA UserPulse360_DB.RAW_DATA FROM ROLE ACCOUNTADMIN;
+SHOW GRANTS ON SCHEMA RAW_DATA;
+
+CREATE OR REPLACE STAGE s3_ingest_stage
+  URL = 's3://userpulse360/loadingdata/csv/'
+  STORAGE_INTEGRATION = AWS_S3_INT
+  FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1); -- Default file format for CSVs
+  
+-- Copy data from S3 into the DIM_USERS table
+COPY INTO DIM_USERS
+FROM @s3_ingest_stage/merged_data.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
+
+Select * from UserPulse360_DB.RAW_DATA.DIM_USERS;
+
+Select * from UserPulse360_DB.RAW_DATA.FACT_EVENTS;
+-- Copy data from S3 into the FACT_EVENTS table, with JSON parsing
+COPY INTO FACT_EVENTS (user_id, timestamp, category_used, feature_used, session_length_sec, platform, date,week,year)
+FROM @s3_ingest_stage/fact_events_transformed.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
+
+-- Copy data from S3
+COPY INTO FACT_DAILY_ACTIVE_USERS
+FROM @s3_ingest_stage/metrics_dau.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
+
+-- Copy data from S3
+COPY INTO FACT_WEEKLY_ACTIVE_USERS
+FROM @s3_ingest_stage/metrics_wau.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
+
+UPDATE FACT_WEEKLY_ACTIVE_USERS
+SET week_start_date = 
+    DATE_ADD(
+        DATE(CONCAT(year, '-01-01')), 
+        INTERVAL (week - 1) * 7 - WEEKDAY(DATE(CONCAT(year, '-01-01'))) DAY
+    );
+
+-- Copy data from S3
+COPY INTO FACT_FEATURE_USAGE
+FROM @s3_ingest_stage/metrics_feature_usage_over_time.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
+
+-- Copy data from S3
+COPY INTO FACT_FEATURE_SUMMARY
+FROM @s3_ingest_stage/metrics_top_features.csv
+FILE_FORMAT = (TYPE = 'CSV', SKIP_HEADER = 1)
+ON_ERROR = 'SKIP_FILE';
