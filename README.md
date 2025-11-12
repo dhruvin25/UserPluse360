@@ -7,6 +7,7 @@
 ---
 
 ## 🏁 Final Dashboard: Executive Overview
+<img width="2457" height="1679" alt="image" src="https://github.com/user-attachments/assets/e8cc988f-54e4-465b-a8d8-b9187226dacd" />
 
 
 
